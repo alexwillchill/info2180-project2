@@ -1,141 +1,194 @@
-window.onload=function(){
-var emptyA= 0; //empty space
-var emptyB= 0;
-var left_pos = 0; // left position control
-var top_pos = 0; // top position control
-var upTop = 0;  //  background image top control
-var left_back = 0; // background image left control
-var randum= Math.floor(Math.random()*4);// continously changing numbers for shuffle
+//window.onload=function(){
+var emptyA; //empty space
+var emptyB;
+//var time;
+var puzzlepieces;
+var temp;
+//var left_pos = 0; // left position control
+//var top_pos = 0; // top position control
+//var upTop = 0;  //  background image top control
+//var left_back = 0; // background image left control
+var mix= Math.floor((Math.random()*100)%4);// continously changing numbers for shuffle
 //var memes= ["CryingJordan.jpg","harambememe.jpg","baby.jpg","loser.jpg"];
 //var randum_meme = Math.floor(Math.random()*memes.length);
-//window.onload= function(){
-var shufflebutt = document.getElementById('shufflebutton');	
-//var puzzle_area = document.getElementById('puzzlearea');
-//var puzzlepieces= puzzle_area.getElementsByTagName("div");
-var puzzlepieces= $('#puzzlearea').children();	
+window.onload= function(){
+	var shufflebutt = document.getElementById('shufflebutton');	
+	var puzzle_area = document.getElementById('puzzlearea');
+	puzzlepieces= puzzle_area.getElementsByTagName('div');
+	//var puzzlepieces= $('#puzzlearea').children();	
 	//orderpuzzle(memes[randum_meme]);
 	//shufflepieces();
 //}	
-
-function shufflepieces(){
-	var check= 0
-	var temp= 0;
-	var temp2= 0;	
-	var randumpiece= puzzlepieces[randum];//randomly selects pieces
-	var tpos= $(obj).position().top;
-	var lpos= $(obj).position().left;
-	if(moveable($(obj))){
-		temp= emptyA;
-		temp2= emptyB;
-		emptyA=tpos;
-		emptyB=lpos;
-		tpos=temp;
-		lpos=temp2;
-
-		$(obj).css({left: lpos,top: tpos});
-		check++;
-		if(check!==99){ // ensures that peces are randomized
-			shufflepieces();//call back function to repeat process
-		}
-		else{
-			check= 0
-		}
-	}
-	else{
-		alert("Pieces not moveable");
-		shufflepieces();
-	}
+	orderpuzzle();
+	shufflebutt.onclick= shufflepieces;
 }
+
 
 function orderpuzzle(){
-		
-	var place= 0;
-	puzzlepieces.addClass('puzzlepieces');
-	puzzlepieces.each(function(){
-		$(this).css({left: left_pos, top: top_pos, backgroundPosition: back_pic(left_back,upTop)});
-		if(place< 4){
-			left_pos=left_pos+100;
-			place++;
-			left_back=left_back-100;
+	for(var i=0;i<puzzlepieces.length; i++){
+		puzzlepieces[i].className = 'puzzlepiece';
+		puzzlepieces[i].style.left= (i%4*100) + 'px';
+		puzzlepieces[i].style.top = (parseInt(i/4)*100) + 'px';
+		puzzlepieces[i].style.backgroundPosition= '-' + puzzlepieces[i].style.left  + ' ' + '-' + puzzlepieces[i].style.top;
+		puzzlepieces[i].onmouseover=function(){
+			if(moveable(parseInt(this.innerHTML))){
+				this.style.backroundImage= "url(https://github.com/alexwillchill/info2180-project2/blob/master/seanbeans.jpg)";
+				this.style.border= '3px solid red';
+				this.style.border= '#006600';
+			}
 		}
-		else if(place== 4){
-			top_pos=top_pos+100;
-			place++;
-			upTop= 300;
-			left_pos=0;
-			left_back=0;
+		puzzlepieces[i].onclick=function(){
+			if(moveable(parseInt(this.innerHTML))){
+				move(this.innerHTML-1);
+				if(done()){
+					timer();
+				}
+				return;
+			}
 		}
-		else if((place>= 5)&&(place< 9)){
-			left_pos=left_pos+ 100;
-			place++;
-			left_back=left_back-100;
+		puzzlepieces[i].onmouseout=function(){
+			this.style.color="#000000";
+			this.style.border= "5px solid black";
+		}
+	}
+	emptyA= '300px';
+	emptyB= '300px';	
+}	
 
-		}
-		else if(place== 9){
-			top_pos=top_pos+100;
-			place++;
-			upTop=200;
-			left_pos=0;
-			top_pos=0;
-		}
-		else if((place>= 10)&& (place < 14)){
-			left_pos= left_pos+100;
-			place++;
-			left_back=left_back-100;
-		}
-		else if(place==14){
-			top_pos=top_pos+100;
-			place++;
-			upTop=100;
-			left_pos=0;
-			left_back=0;
-		}
-		else if((place>=13)&&(place< 18)){
-			left_pos= left_pos+100;
-			place++;
-			left_back=left_back-100;
-		}
-		else if(place== 18){
-			emptyB=top_pos;
-			emptyA=left_pos;
-		}
-	});
 
+function shufflepieces(){
+	for(var i=0;i<250;i++){
+		if(mix==0){
+			var slide= slideup(emptyA,emptyB);
+			if(slide!= -1){
+				move(slide);
+			}
+		}
+		if(mix==1){
+			var slide=slidedown(emptyA,emptyB);
+			if(slide!=-1){
+					move(slide);
+				
+			}
+		}
+		if(mix==2){
+			var slide= slideleft(emptyA,emptyB);
+			if(slide!=-1){
+				move(slide);
+			}
+		}
+		if(mix==3){
+			var slide=slideright(emptyA,emptyB);
+			if(slide!=-1){
+				move(slide);
+			}
+		} 
+	}
 }
 
 
-function move(){
-	var left_move= $(this).position().left;
-	var top_move= $(this).position().top;
-	var temp=0;
-	var temp2=0;
-	if(moveable($(this))){
-		temp= emptyA;
-		temp2= emptyB;
-		emptyB=top_move;
-		emptyA=left_move;
-		left_move=temp;
-		top_move=temp2;
-
-	}
+function move(piec){
+	temp=puzzlepieces[piec].style.top;
+	puzzlepieces[piec].style.top= emptyB;
+	emptyB= temp;
+	temp=puzzlepieces[piec].style.left;
+	puzzlepieces[piec].style.left= emptyA;
+	emptyA= temp;
 }		
 		
 			
 function moveable(piece){// tests if piece is valid for movement
-	if(piece.position().left== (emptyB + 100) || piece.position().left== (emptyB - 100)){
-		if(piece.position().top== emptyA){
-			return true;
+	if(slideup(emptyA,emptyB)==(piece-1)){
+		return true;
+	}
+	if(slideright(emptyA,emptyB)==(piece-1)){
+		return true;
+	}
+	if(slideleft(emptyA,emptyB)==(piece-1)){
+		return true;
+	}
+	if(slidedown(emptyA,emptyB)==(piece-1)){
+		return true;
+	}
+}
+
+
+function slideleft(pieceA, pieceB){
+	var pA = parseInt(pieceA);
+	var pB = parseInt(pieceB);
+	if (pA >= 1){
+		for (var i = 0; i < puzzlepieces.length; i++){ 		
+			if(parseInt(puzzlepieces[i].style.left) + 100== pA && parseInt(puzzlepieces[i].style.top)== pB){			
+				return i;
+			} 
 		}
 	}
-	if(piece.position().top== (emptyA + 100) || piece.position().top== (emptyA- 100)){
-		if(piece.position().left== emptyB){
-			return true;
+	else{ 	
+		return -1;
+	}
+}
+
+function slideright(pieceA, pieceB) {
+	var pA = parseInt(pieceA);
+	var pB = parseInt(pieceB);
+	if (pA < 300){	
+		for (var i =0; i<puzzlepieces.length; i++){
+			if(parseInt(puzzlepieces[i].style.left) - 100== pA && parseInt(puzzlepieces[i].style.top)== pB){ 			
+				return i;
+			}
 		}
 	}
-}	
+	else{	
+		return -1;
+	} 
+}
+
+function slideup(pieceA, pieceB) {
+	var pA = parseInt(pieceA);
+	var pB = parseInt(pieceB);
+	if (pB >= 1){	
+		for (var i=0; i<puzzlepieces.length; i++){		
+			if(parseInt(puzzlepieces[i].style.top) + 100== pB && parseInt(puzzlepieces[i].style.left)== pA){ 			
+				return i;
+			}
+		} 
+	}
+	else{ 	
+		return -1;
+	}
+}
+
+function slidedown(pieceA, pieceB)
+{
+	var pA = parseInt(pieceA);
+	var pB = parseInt(pieceB);
+	if (pB < 300){	
+		for (var i=0; i<puzzlepieces.length; i++){		
+			if(parseInt(puzzlepieces[i].style.top) - 100== pB && parseInt(puzzlepieces[i].style.left)== pA){ 			
+				return i;
+			}
+		}
+	}
+	else{	
+		return -1;
+	} 
+}
+
+
+
+function timer(){
+	var time = Date.now();
+	var running = setInterval(run, 10); // Save this so we can clear/cancel it later
+
+	setTimeout(function(){        // Set a timer
+  		clearInterval(running);      // Stop the running loop
+  		alert('Game over!');         // Let the user know, do other stuff here
+	}, 30000);                     // time in miliseconds before the game ends
+}
+
 	
 
-function meme(){
+/*function meme(){
 	//var memecount= Math.floor(Math.random()*4);
 	switch(randum){
 		case 0:
@@ -176,7 +229,7 @@ puzzlepieces.click(move);
 
 
    //line up puzzle	
-	/*for(var x=0; x< puzzlepieces.length; x++){
+	for(var x=0; x< puzzlepieces.length; x++){
 		var left_calc=
 		puzzlepieces[x].className = "Tile";
 		puzzlepieces[x].style.left = left_pos + "px";
